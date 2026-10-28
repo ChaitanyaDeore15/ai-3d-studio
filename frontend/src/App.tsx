@@ -57,7 +57,7 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-studio-900 text-studio-100 font-sans">
+    <div className="w-full h-full flex flex-col bg-studio-900 text-studio-100 font-sans overflow-hidden">
       <Navbar
         currentTab={currentTab}
         onTabChange={setCurrentTab}
@@ -67,7 +67,7 @@ export function App() {
         onLogout={handleLogout}
       />
 
-      <main className="flex-1 flex flex-col overflow-hidden min-h-0">
+      <main className="flex-1 w-full min-h-0 flex flex-col overflow-hidden relative">
         {currentTab === 'landing' && (
           <LandingPage
             onEnterStudio={() => setCurrentTab('studio')}

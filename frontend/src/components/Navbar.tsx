@@ -20,17 +20,17 @@ export const Navbar: React.FC<NavbarProps> = ({
   onLogout
 }) => {
   return (
-    <header className="h-16 bg-studio-800/95 border-b border-studio-700/80 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-40 backdrop-blur-md">
+    <header className="h-14 bg-studio-800/95 border-b border-studio-700/80 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-40 backdrop-blur-md flex-shrink-0">
       {/* Brand */}
       <div
         onClick={() => onTabChange('landing')}
         className="flex items-center space-x-2.5 cursor-pointer select-none group"
       >
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition">
-          <Box className="w-5 h-5" />
+        <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center text-white shadow group-hover:scale-105 transition">
+          <Box className="w-4 h-4" />
         </div>
         <div>
-          <span className="font-extrabold text-base tracking-tight text-white flex items-center space-x-1">
+          <span className="font-extrabold text-sm sm:text-base tracking-tight text-white flex items-center space-x-1">
             <span>AI 3D Studio</span>
           </span>
           <div className="flex items-center space-x-1.5 text-[10px] text-studio-500">
@@ -44,7 +44,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       <nav className="flex items-center space-x-1 bg-studio-900/60 p-1 rounded-xl border border-studio-700/60">
         <button
           onClick={() => onTabChange('landing')}
-          className={`flex items-center space-x-1.5 px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
+          className={`flex items-center space-x-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition ${
             currentTab === 'landing'
               ? 'bg-studio-700 text-white shadow'
               : 'text-studio-100 hover:text-white hover:bg-studio-700/40'
@@ -56,7 +56,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         <button
           onClick={() => onTabChange('studio')}
-          className={`flex items-center space-x-1.5 px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
+          className={`flex items-center space-x-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition ${
             currentTab === 'studio'
               ? 'bg-brand-600 text-white shadow'
               : 'text-studio-100 hover:text-white hover:bg-studio-700/40'
@@ -68,7 +68,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         <button
           onClick={() => onTabChange('library')}
-          className={`flex items-center space-x-1.5 px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
+          className={`flex items-center space-x-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition ${
             currentTab === 'library'
               ? 'bg-studio-700 text-white shadow'
               : 'text-studio-100 hover:text-white hover:bg-studio-700/40'
