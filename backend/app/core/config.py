@@ -1,4 +1,5 @@
 import os
+import sys
 from pydantic import BaseModel
 from typing import Optional, Literal
 
@@ -15,10 +16,10 @@ class Settings(BaseModel):
     # Redis / Queue
     REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
     
-    # Blender executable path
+    # Blender executable path (Windows default or Linux / Docker default)
     BLENDER_PATH: str = os.getenv(
         "BLENDER_PATH", 
-        r"C:\Program Files\Blender Foundation\Blender 5.2\blender.exe"
+        r"C:\Program Files\Blender Foundation\Blender 5.2\blender.exe" if sys.platform == "win32" else "/usr/local/bin/blender"
     )
     BLENDER_TIMEOUT_SECONDS: int = int(os.getenv("BLENDER_TIMEOUT_SECONDS", "60"))
     

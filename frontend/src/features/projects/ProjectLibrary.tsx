@@ -21,7 +21,8 @@ import {
   deleteAsset,
   updateAsset,
   requestExport,
-  getExportJob
+  getExportJob,
+  resolveAssetUrl
 } from '../../services/api';
 
 interface ProjectLibraryProps {
@@ -131,7 +132,7 @@ export const ProjectLibrary: React.FC<ProjectLibraryProps> = ({ onLoadInStudio }
         if (status.status === 'completed' && status.download_url) {
           clearInterval(poll);
           setExportingAssetId(null);
-          window.location.href = status.download_url;
+          window.location.href = resolveAssetUrl(status.download_url);
         } else if (status.status === 'failed' || attempts > 20) {
           clearInterval(poll);
           setExportingAssetId(null);

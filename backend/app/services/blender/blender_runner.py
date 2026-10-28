@@ -3,6 +3,7 @@ import subprocess
 import json
 import tempfile
 import sys
+import shutil
 from typing import Dict, Any, Optional
 from backend.app.core.config import settings
 
@@ -13,17 +14,23 @@ class BlenderRunner:
             os.path.join(os.path.dirname(__file__), "../../../../blender/scripts/entrypoint.py")
         )
 
-    def is_available(self) -> bool:
+    def _resolve_binary(self) -> Optional[str]:
         if not self.blender_path:
-            return False
-        return os.path.isfile(self.blender_path) and os.access(self.blender_path, os.X_OK)
+            return None
+        if os.path.isfile(self.blender_path):
+            return self.blender_path
+        return shutil.which(self.blender_path)
+
+    def is_available(self) -> bool:
+        return self._resolve_binary() is not None
 
     def get_version(self) -> Optional[str]:
-        if not self.is_available():
+        binary = self._resolve_binary()
+        if not binary:
             return None
         try:
             cmd = [
-                self.blender_path,
+                binary,
                 "--background",
                 "--python-expr",
                 "import bpy; print('BLENDER_VERSION_OUT:', bpy.app.version_string)"
@@ -46,7 +53,8 @@ class BlenderRunner:
         Executes Blender in background mode to build and export a procedural 3D model.
         Returns dictionary containing output_path, statistics, and validation.
         """
-        if not self.is_available():
+        binary = self._resolve_binary()
+        if not binary:
             raise RuntimeError(f"Blender executable not found at '{self.blender_path}'")
 
         if not os.path.isfile(self.entrypoint_script):
@@ -68,7 +76,7 @@ class BlenderRunner:
                 json.dump(spec_content, f)
 
             cmd = [
-                self.blender_path,
+                binary,
                 "--background",
                 "--python",
                 self.entrypoint_script,

@@ -25,7 +25,8 @@ import {
   cancelGenerationJob,
   fetchAsset,
   uploadReferenceImage,
-  submitRefinement
+  submitRefinement,
+  resolveAssetUrl
 } from '../../services/api';
 import { ThreeViewer } from '../viewer/ThreeViewer';
 
@@ -611,7 +612,7 @@ export const StudioWorkspace: React.FC<StudioWorkspaceProps> = ({ capabilities, 
                 </button>
 
                 <a
-                  href={`/api/assets/${currentAsset.id}/file`}
+                  href={resolveAssetUrl(currentAsset.download_url || `/api/assets/${currentAsset.id}/file`)}
                   download={`model_${currentAsset.id.slice(0, 8)}.glb`}
                   className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold py-2 px-3 rounded-lg flex items-center justify-center space-x-1.5 transition text-center"
                 >

@@ -8,7 +8,16 @@ import {
   User
 } from '../types';
 
-const API_BASE = '/api';
+const RAW_BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+export const API_BASE = RAW_BASE ? `${RAW_BASE}/api` : '/api';
+
+export function resolveAssetUrl(url: string | null | undefined): string {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('blob:')) {
+    return url;
+  }
+  return RAW_BASE ? `${RAW_BASE}${url}` : url;
+}
 
 export function getAuthToken(): string | null {
   return localStorage.getItem('ai3d_token');
@@ -126,7 +135,8 @@ export async function fetchAssets(projectId?: string): Promise<Asset[]> {
     headers: getAuthHeaders()
   });
   if (!res.ok) throw new Error('Failed to load assets');
-  return res.json();
+  const data: Asset[] = await res.json();
+  return data.map((a) => ({ ...a, download_url: resolveAssetUrl(a.download_url) }));
 }
 
 export async function fetchAsset(assetId: string): Promise<Asset> {
@@ -134,7 +144,9 @@ export async function fetchAsset(assetId: string): Promise<Asset> {
     headers: getAuthHeaders()
   });
   if (!res.ok) throw new Error(`Asset not found: ${assetId}`);
-  return res.json();
+  const data: Asset = await res.json();
+  data.download_url = resolveAssetUrl(data.download_url);
+  return data;
 }
 
 export async function updateAsset(assetId: string, projectId: string | null): Promise<Asset> {
