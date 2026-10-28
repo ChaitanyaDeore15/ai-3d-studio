@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: ai-3d-studio-backend
+    env: docker
+    dockerfilePath: infrastructure/docker/Dockerfile.backend
+    plan: free
+    region: frankfurt
+    healthCheckPath: /api/health
+    envVars:
+      - key: ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: STORAGE_TYPE
+        value: local
+      - key: AI_3D_PROVIDER
+        value: none
+      - key: MESHY_API_KEY
+        sync: false
+      - key: TRIPO_API_KEY
+        sync: false
