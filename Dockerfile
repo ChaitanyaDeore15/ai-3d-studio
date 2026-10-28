@@ -4,33 +4,17 @@ FROM ubuntu:22.04 AS base
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
 
-# Install system dependencies, Python 3.11, and Blender headless prerequisites
+# Install system dependencies, Python 3, pip, and headless Blender
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     wget \
-    xz-utils \
     git \
     python3 \
     python3-pip \
     python3-dev \
-    libgl1 \
-    libxi6 \
-    libxrender1 \
-    libxxf86vm \
-    libxfixes3 \
-    libxkbcommon0 \
-    libsm6 \
-    libgl1-mesa-glx \
+    blender \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
-
-# Download and install official standalone Blender 4.2 / 5.x LTS Linux release
-WORKDIR /opt
-RUN wget https://download.blender.org/release/Blender4.2/blender-4.2.0-linux-x64.tar.xz -O blender.tar.xz \
-    && tar -xf blender.tar.xz \
-    && rm blender.tar.xz \
-    && mv blender-4.2.0-linux-x64 blender \
-    && ln -s /opt/blender/blender /usr/local/bin/blender
 
 # Set up backend app directory
 WORKDIR /app
@@ -44,7 +28,7 @@ COPY backend ./backend
 COPY blender ./blender
 COPY shared ./shared
 
-ENV BLENDER_PATH=/usr/local/bin/blender
+ENV BLENDER_PATH=/usr/bin/blender
 ENV STORAGE_TYPE=local
 ENV LOCAL_STORAGE_DIR=/app/storage_data
 ENV PYTHONPATH=/app
