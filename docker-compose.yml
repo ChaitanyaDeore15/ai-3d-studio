@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ai3d_postgres
+    environment:
+      POSTGRES_DB: ai_3d_studio
+      POSTGRES_USER: ai3d_user
+      POSTGRES_PASSWORD: ai3d_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ai3d_user -d ai_3d_studio"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: ai3d_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.backend
+    container_name: ai3d_backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - ENV=production
+      - DATABASE_URL=postgresql://ai3d_user:ai3d_password@postgres:5432/ai_3d_studio
+      - REDIS_URL=redis://redis:6379/0
+      - BLENDER_PATH=/usr/local/bin/blender
+      - STORAGE_TYPE=local
+      - LOCAL_STORAGE_DIR=/app/storage_data
+      - AI_3D_PROVIDER=meshy
+      - MESHY_API_KEY=${MESHY_API_KEY:-}
+      - TRIPO_API_KEY=${TRIPO_API_KEY:-}
+    volumes:
+      - studio_assets:/app/storage_data
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.frontend
+    container_name: ai3d_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+
+volumes:
+  postgres_data:
+  redis_data:
+  studio_assets:

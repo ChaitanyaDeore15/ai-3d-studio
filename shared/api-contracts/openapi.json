@@ -1,0 +1,2192 @@
+﻿{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "AI 3D Studio",
+    "description": "Production-grade AI & Procedural 3D Asset Creation Platform",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/auth/register": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Register User",
+        "description": "Registers a new user account with secure password hashing.\nEnforces unique emails and usernames.",
+        "operationId": "register_user_api_auth_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Login User",
+        "description": "Authenticates user with email/username and password.\nReturns signed JWT access token.",
+        "operationId": "login_user_api_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserLoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Get Current User Profile",
+        "description": "Returns the authenticated user profile.",
+        "operationId": "get_current_user_profile_api_auth_me_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-User-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-User-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/health": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "summary": "Get Health",
+        "operationId": "get_health_api_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/capabilities": {
+      "get": {
+        "tags": [
+          "Capabilities"
+        ],
+        "summary": "Get System Capabilities",
+        "operationId": "get_system_capabilities_api_capabilities_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/uploads": {
+      "post": {
+        "tags": [
+          "Uploads"
+        ],
+        "summary": "Upload Reference Image",
+        "description": "Safely stores user uploaded reference image for image-to-3D workflows.\nValidates MIME type, magic bytes, and file size.",
+        "operationId": "upload_reference_image_api_uploads_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-User-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-User-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_reference_image_api_uploads_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/generations": {
+      "post": {
+        "tags": [
+          "Generation"
+        ],
+        "summary": "Create Generation",
+        "description": "Submits a new 3D generation request.\nRoutes intelligently to Blender procedural builder or AI Provider.\nDispatches task asynchronously and returns immediately.",
+        "operationId": "create_generation_api_generations_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-User-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-User-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerationCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerationJobResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/generations/{job_id}": {
+      "get": {
+        "tags": [
+          "Generation"
+        ],
+        "summary": "Get Generation Status",
+        "operationId": "get_generation_status_api_generations__job_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          },
+          {
+            "name": "X-User-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-User-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerationJobResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/generations/{job_id}/cancel": {
+      "post": {
+        "tags": [
+          "Generation"
+        ],
+        "summary": "Cancel Generation",
+        "operationId": "cancel_generation_api_generations__job_id__cancel_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          },
+          {
+            "name": "X-User-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-User-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects": {
+      "get": {
+        "tags": [
+          "Projects"
+        ],
+        "summary": "List Projects",
+        "operationId": "list_projects_api_projects_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-User-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-User-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProjectResponse"
+                  },
+                  "title": "Response List Projects Api Projects Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Projects"
+        ],
+        "summary": "Create Project",
+        "operationId": "create_project_api_projects_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-User-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-User-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/{project_id}": {
+      "get": {
+        "tags": [
+          "Projects"
+        ],
+        "summary": "Get Project Details",
+        "operationId": "get_project_details_api_projects__project_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Project Id"
+            }
+          },
+          {
+            "name": "X-User-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-User-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Projects"
+        ],
+        "summary": "Delete Project",
+        "operationId": "delete_project_api_projects__project_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Project Id"
+            }
+          },
+          {
+            "name": "X-User-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-User-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/assets": {
+      "get": {
+        "tags": [
+          "Assets"
+        ],
+        "summary": "List Assets",
+        "description": "Lists all 3D assets owned by the authenticated user.\nSupports filtering by project.",
+        "operationId": "list_assets_api_assets_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter assets by project ID",
+              "title": "Project Id"
+            },
+            "description": "Filter assets by project ID"
+          },
+          {
+            "name": "X-User-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-User-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AssetResponse"
+                  },
+                  "title": "Response List Assets Api Assets Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/assets/{asset_id}": {
+      "get": {
+        "tags": [
+          "Assets"
+        ],
+        "summary": "Get Asset",
+        "operationId": "get_asset_api_assets__asset_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "asset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Asset Id"
+            }
+          },
+          {
+            "name": "X-User-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-User-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssetResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Assets"
+        ],
+        "summary": "Update Asset",
+        "description": "Updates asset metadata, such as assigning or reassigning it to a project.",
+        "operationId": "update_asset_api_assets__asset_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "asset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Asset Id"
+            }
+          },
+          {
+            "name": "X-User-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-User-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssetUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssetResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Assets"
+        ],
+        "summary": "Delete Asset",
+        "description": "Deletes an asset and its physical file from storage.\nEnforces strict ownership check.",
+        "operationId": "delete_asset_api_assets__asset_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "asset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Asset Id"
+            }
+          },
+          {
+            "name": "X-User-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-User-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/assets/{asset_id}/file": {
+      "get": {
+        "tags": [
+          "Assets"
+        ],
+        "summary": "Get Asset File",
+        "description": "Publicly serve the 3D asset file for interactive 3D WebGL viewers.",
+        "operationId": "get_asset_file_api_assets__asset_id__file_get",
+        "parameters": [
+          {
+            "name": "asset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Asset Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/assets/{asset_id}/exports": {
+      "post": {
+        "tags": [
+          "Assets"
+        ],
+        "summary": "Request Export",
+        "operationId": "request_export_api_assets__asset_id__exports_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "asset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Asset Id"
+            }
+          },
+          {
+            "name": "X-User-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-User-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportJobResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/exports/{export_id}": {
+      "get": {
+        "tags": [
+          "Exports"
+        ],
+        "summary": "Get Export Status",
+        "operationId": "get_export_status_api_exports__export_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "export_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Export Id"
+            }
+          },
+          {
+            "name": "X-User-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-User-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportJobResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/exports/{export_id}/download": {
+      "get": {
+        "tags": [
+          "Exports"
+        ],
+        "summary": "Download Exported File",
+        "operationId": "download_exported_file_api_exports__export_id__download_get",
+        "parameters": [
+          {
+            "name": "export_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Export Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/refine/{asset_id}": {
+      "post": {
+        "tags": [
+          "Refinement"
+        ],
+        "summary": "Refine Asset",
+        "operationId": "refine_asset_api_refine__asset_id__post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "asset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Asset Id"
+            }
+          },
+          {
+            "name": "X-User-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-User-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefineRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerationJobResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "summary": "Read Root",
+        "operationId": "read_root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AssetResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "owner_id": {
+            "type": "string",
+            "title": "Owner Id"
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Id"
+          },
+          "source_job_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Job Id"
+          },
+          "prompt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt"
+          },
+          "generation_mode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Generation Mode"
+          },
+          "mime_type": {
+            "type": "string",
+            "title": "Mime Type"
+          },
+          "file_size": {
+            "type": "integer",
+            "title": "File Size"
+          },
+          "file_checksum": {
+            "type": "string",
+            "title": "File Checksum"
+          },
+          "file_format": {
+            "type": "string",
+            "title": "File Format"
+          },
+          "dimensions": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dimensions"
+          },
+          "polygon_count": {
+            "type": "integer",
+            "title": "Polygon Count"
+          },
+          "vertex_count": {
+            "type": "integer",
+            "title": "Vertex Count"
+          },
+          "validation_status": {
+            "type": "string",
+            "title": "Validation Status"
+          },
+          "validation_report": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Validation Report"
+          },
+          "parent_asset_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Asset Id"
+          },
+          "download_url": {
+            "type": "string",
+            "title": "Download Url"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "owner_id",
+          "mime_type",
+          "file_size",
+          "file_checksum",
+          "file_format",
+          "polygon_count",
+          "vertex_count",
+          "validation_status",
+          "download_url",
+          "created_at"
+        ],
+        "title": "AssetResponse"
+      },
+      "AssetUpdateRequest": {
+        "properties": {
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Id",
+            "description": "Project ID to assign this asset to, or None to unassign"
+          }
+        },
+        "type": "object",
+        "title": "AssetUpdateRequest"
+      },
+      "Body_upload_reference_image_api_uploads_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_upload_reference_image_api_uploads_post"
+      },
+      "DimensionsInput": {
+        "properties": {
+          "width": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "minimum": 0.05
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Width",
+            "description": "Width in meters"
+          },
+          "depth": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "minimum": 0.05
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Depth",
+            "description": "Depth / Length in meters"
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "minimum": 0.05
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height",
+            "description": "Height in meters"
+          },
+          "units": {
+            "type": "string",
+            "title": "Units",
+            "default": "meters"
+          }
+        },
+        "type": "object",
+        "title": "DimensionsInput"
+      },
+      "ExportCreateRequest": {
+        "properties": {
+          "requested_format": {
+            "type": "string",
+            "enum": [
+              "glb",
+              "gltf_zip"
+            ],
+            "title": "Requested Format",
+            "default": "glb"
+          }
+        },
+        "type": "object",
+        "title": "ExportCreateRequest"
+      },
+      "ExportJobResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "asset_id": {
+            "type": "string",
+            "title": "Asset Id"
+          },
+          "requested_format": {
+            "type": "string",
+            "title": "Requested Format"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "download_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Download Url"
+          },
+          "validation_report": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Validation Report"
+          },
+          "error_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Message"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "asset_id",
+          "requested_format",
+          "status",
+          "created_at"
+        ],
+        "title": "ExportJobResponse"
+      },
+      "GenerationCreateRequest": {
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 2,
+            "title": "Prompt",
+            "description": "Natural language description of 3D asset"
+          },
+          "generation_mode": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "procedural",
+              "ai_text",
+              "ai_image"
+            ],
+            "title": "Generation Mode",
+            "description": "Generation path",
+            "default": "auto"
+          },
+          "reference_image_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Image Id",
+            "description": "Optional uploaded image ID"
+          },
+          "object_category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Object Category",
+            "description": "Optional category hint: table, chair, cabinet, house, room, column, road_segment, platform"
+          },
+          "style": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Style",
+            "description": "Style preference: modern, classic, rustic, minimalist, scifi",
+            "default": "modern"
+          },
+          "dimensions": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DimensionsInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "material_preferences": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MaterialPreferencesInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "target_polygon_count": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 500000.0,
+                "minimum": 50.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Polygon Count"
+          },
+          "export_format": {
+            "type": "string",
+            "enum": [
+              "glb",
+              "gltf_zip"
+            ],
+            "title": "Export Format",
+            "default": "glb"
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "prompt"
+        ],
+        "title": "GenerationCreateRequest"
+      },
+      "GenerationJobResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "owner_id": {
+            "type": "string",
+            "title": "Owner Id"
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Id"
+          },
+          "generation_mode": {
+            "type": "string",
+            "title": "Generation Mode"
+          },
+          "provider": {
+            "type": "string",
+            "title": "Provider"
+          },
+          "prompt": {
+            "type": "string",
+            "title": "Prompt"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "progress": {
+            "type": "integer",
+            "title": "Progress"
+          },
+          "provider_task_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Task Id"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "safe_error_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Safe Error Message"
+          },
+          "asset_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Asset Id"
+          },
+          "asset_download_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Asset Download Url"
+          },
+          "validation_report": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Validation Report"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "owner_id",
+          "generation_mode",
+          "provider",
+          "prompt",
+          "status",
+          "progress",
+          "created_at"
+        ],
+        "title": "GenerationJobResponse"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "MaterialPreferencesInput": {
+        "properties": {
+          "preset": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preset",
+            "description": "Supported preset name",
+            "default": "wood"
+          },
+          "color_hex": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Color Hex",
+            "description": "Hex color e.g. #8B5A2B"
+          }
+        },
+        "type": "object",
+        "title": "MaterialPreferencesInput"
+      },
+      "ProjectCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "ProjectCreate"
+      },
+      "ProjectResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "owner_id": {
+            "type": "string",
+            "title": "Owner Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "asset_count": {
+            "type": "integer",
+            "title": "Asset Count",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "owner_id",
+          "name",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "ProjectResponse"
+      },
+      "RefineRequest": {
+        "properties": {
+          "prompt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt"
+          },
+          "dimensions": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DimensionsInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "material_preferences": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MaterialPreferencesInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "style": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Style"
+          },
+          "category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category"
+          }
+        },
+        "type": "object",
+        "title": "RefineRequest"
+      },
+      "TokenResponse": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token"
+          },
+          "token_type": {
+            "type": "string",
+            "title": "Token Type",
+            "default": "bearer"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserResponse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token",
+          "user"
+        ],
+        "title": "TokenResponse"
+      },
+      "UserLoginRequest": {
+        "properties": {
+          "email_or_username": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 2,
+            "title": "Email Or Username"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email_or_username",
+          "password"
+        ],
+        "title": "UserLoginRequest"
+      },
+      "UserRegisterRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email",
+            "description": "Valid email address"
+          },
+          "username": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 3,
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "title": "Username",
+            "description": "Alphanumeric username"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 6,
+            "title": "Password",
+            "description": "Password of at least 6 characters"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "username",
+          "password"
+        ],
+        "title": "UserRegisterRequest"
+      },
+      "UserResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "username": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Username"
+          },
+          "account_status": {
+            "type": "string",
+            "title": "Account Status"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "account_status",
+          "created_at"
+        ],
+        "title": "UserResponse"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}
