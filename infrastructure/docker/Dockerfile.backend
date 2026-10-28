@@ -4,7 +4,7 @@ FROM ubuntu:22.04 AS base
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
 
-# Install system dependencies, Python 3, pip, and headless Blender
+# Install system dependencies, Python 3, pip, numpy, and headless Blender
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     wget \
@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
     python3-pip \
     python3-dev \
+    python3-numpy \
     blender \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
